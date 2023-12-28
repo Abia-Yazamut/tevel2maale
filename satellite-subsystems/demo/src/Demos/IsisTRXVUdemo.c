@@ -426,6 +426,8 @@ static Boolean vutc_getTxTelemTest_revD(void)
 
 	return TRUE;
 }
+static Boolean MaaleAdumim1(void)
+{	printf("Hello World\n\r");	return 1;}
 
 static Boolean selectAndExecuteTRXVUDemoTest(void)
 {
@@ -445,9 +447,11 @@ static Boolean selectAndExecuteTRXVUDemoTest(void)
 	printf("\t 10) (revD) Get command frame by interrupt \n\r");
 	printf("\t 11) (revD) Get receiver telemetry \n\r");
 	printf("\t 12) (revD) Get transmitter telemetry \n\r");
-	printf("\t 13) Return to main menu \n\r");
+	printf("\t 13) hello world form Maale Adumim\n\r");
+	printf("\t 14) Return to main menu \n\r");
 
-	while(UTIL_DbguGetIntegerMinMax(&selection, 1, 13) == 0);
+
+	while(UTIL_DbguGetIntegerMinMax(&selection, 1, 14) == 0);
 
 	switch(selection) {
 	case 1:
@@ -487,8 +491,12 @@ static Boolean selectAndExecuteTRXVUDemoTest(void)
 		offerMoreTests = vutc_getTxTelemTest_revD();
 		break;
 	case 13:
+		offerMoreTests = MaaleAdumim1();
+		break;
+	case 14:
 		offerMoreTests = FALSE;
 		break;
+
 
 	default:
 		break;
