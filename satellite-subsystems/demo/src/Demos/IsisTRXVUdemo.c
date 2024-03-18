@@ -66,6 +66,73 @@ static Boolean hardResetVUTest(void)
 	return TRUE;
 }
 
+static Boolean getNumFromUserAndSend(void)
+{
+	//Buffers and variables definition
+	unsigned char testBuffer1[10]  = {0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x40};
+	unsigned char txCounter = 0;
+	unsigned char avalFrames = 0;
+	unsigned int timeoutCounter = 0;
+	unsigned int userInput;
+	printf("\r\nPut a number of how many packages:\r\n");
+	while(UTIL_DbguGetInteger(&userInput)!=1);
+
+	while(txCounter < userInput && timeoutCounter < userInput)
+	{
+		printf("\r\n Transmission of single buffers with default callsign. AX25 Format. \r\n");
+		print_error(IsisTrxvu_tcSendAX25DefClSign(0, testBuffer1, 10, &avalFrames));
+
+		if ((avalFrames != 0)&&(avalFrames != 255))
+		{
+			printf("\r\n Number of frames in the buffer: %d  \r\n", avalFrames);
+			txCounter++;
+		}
+		else
+		{
+			vTaskDelay(100 / portTICK_RATE_MS);
+			timeoutCounter++;
+		}
+	}
+
+	return TRUE;
+}
+
+
+static Boolean getHexaPackegeFromUser(void)
+{
+	//Buffers and variables definition
+	unsigned char txCounter = 0;
+	unsigned char avalFrames = 0;
+	unsigned int timeoutCounter = 0;
+	//UTIL_DbguGetHexa32
+	int i;
+	unsigned int input;
+	unsigned char HexaPackege1[5] = {0};
+	for(i=0;i<5;i++){
+		while(UTIL_DbguGetHexa32(&input)!=1);
+		HexaPackege1[i]=(unsigned char)input;
+	}
+
+	while(txCounter < 5 && timeoutCounter < 5)
+	{
+		printf("\r\n Transmission of single buffers with default callsign. AX25 Format. \r\n");
+		print_error(IsisTrxvu_tcSendAX25DefClSign(0, HexaPackege1, 10, &avalFrames));
+
+		if ((avalFrames != 0)&&(avalFrames != 255))
+		{
+			printf("\r\n Number of frames in the buffer: %d  \r\n", avalFrames);
+			txCounter++;
+		}
+		else
+		{
+			vTaskDelay(100 / portTICK_RATE_MS);
+			timeoutCounter++;
+		}
+	}
+
+	return TRUE;
+}
+
 static Boolean vutc_sendDefClSignTest(void)
 {
 	//Buffers and variables definition
@@ -426,8 +493,6 @@ static Boolean vutc_getTxTelemTest_revD(void)
 
 	return TRUE;
 }
-static Boolean MaaleAdumim1(void)
-{	printf("Hello World\n\r");	return 1;}
 
 static Boolean selectAndExecuteTRXVUDemoTest(void)
 {
@@ -447,11 +512,11 @@ static Boolean selectAndExecuteTRXVUDemoTest(void)
 	printf("\t 10) (revD) Get command frame by interrupt \n\r");
 	printf("\t 11) (revD) Get receiver telemetry \n\r");
 	printf("\t 12) (revD) Get transmitter telemetry \n\r");
-	printf("\t 13) hello world form Maale Adumim\n\r");
-	printf("\t 14) Return to main menu \n\r");
+	printf("\t 13) Default Callsign Send Test by user input\n\r");
+	printf("\t 14) Default Callsign Send Test by data\n\r");
+	printf("\t 15) Return to main menu \n\r");
 
-
-	while(UTIL_DbguGetIntegerMinMax(&selection, 1, 14) == 0);
+	while(UTIL_DbguGetIntegerMinMax(&selection, 1, 15) == 0);
 
 	switch(selection) {
 	case 1:
@@ -491,12 +556,14 @@ static Boolean selectAndExecuteTRXVUDemoTest(void)
 		offerMoreTests = vutc_getTxTelemTest_revD();
 		break;
 	case 13:
-		offerMoreTests = MaaleAdumim1();
+		offerMoreTests = getNumFromUserAndSend();
 		break;
 	case 14:
+		offerMoreTests = getHexaPackegeFromUser();
+		break;
+	case 15:
 		offerMoreTests = FALSE;
 		break;
-
 
 	default:
 		break;
@@ -535,7 +602,7 @@ Boolean IsisTRXVUdemoInit(void)
 	myTRXVUBuffers[0].maxAX25frameLengthRX = SIZE_RXFRAME;
 
 	//Bitrate definition
-	myTRXVUBitrates[0] = trxvu_bitrate_1200;
+	myTRXVUBitrates[0] = trxvu_bitrate_9600;
 
 	//Initialize the trxvu subsystem
 	rv = IsisTrxvu_initialize(myTRXVUAddress, myTRXVUBuffers, myTRXVUBitrates, 1);
